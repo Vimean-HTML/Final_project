@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Library — Reader Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.3.0/tabler-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --navy:#0d1f44;
+      --navy2:#071229;
+      --blue:#1a3699;
+      --blue-mid:#3b62d4;
+      --blue-light:#eef2ff;
+      --accent:#7badff;
+      --sidebar-w:260px;
+      --topbar-h:64px;
+      --bg:#f0f4fb;
+      --card:#ffffff;
+      --text:#0d1a36;
+      --muted:#7a8aaa;
+      --border:#dde3f0;
+      --green:#16a34a;
+      --green-bg:#f0fdf4;
+      --amber:#d97706;
+      --amber-bg:#fffbeb;
+      --red:#dc2626;
+      --red-bg:#fef2f2;
+    }
+
+    body{
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar{
+      width:var(--sidebar-w);
+      min-height:100vh;
+      background:linear-gradient(175deg,var(--navy) 0%,var(--navy2) 100%);
+      display:flex;
+      flex-direction:column;
+      position:fixed;
+      top:0;left:0;
+      z-index:100;
+      transition:transform .3s ease;
+    }
+
+    .sidebar-brand{
+      padding:28px 24px 20px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+
+    .sidebar-brand-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      background:rgba(99,141,255,.12);
+      border:1px solid rgba(99,141,255,.22);
+      border-radius:20px;
+      padding:4px 12px 4px 9px;
+      font-size:10px;font-weight:500;
+      color:#8aadff;letter-spacing:.07em;text-transform:uppercase;
+      margin-bottom:14px;
+    }
+
+    .sidebar-brand h2{
+      font-family:'Playfair Display',serif;
+      font-size:1.25rem;font-weight:700;
+      color:#e8eeff;line-height:1.3;
+    }
+
+    .sidebar-user{
+      padding:18px 24px;
+      display:flex;align-items:center;gap:12px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+
+    .user-avatar{
+      width:40px;height:40px;border-radius:50%;
+      background:linear-gradient(135deg,#3b62d4,#7badff);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:600;font-size:15px;color:#fff;
+      flex-shrink:0;
+    }
+
+    .user-name{font-size:13.5px;font-weight:600;color:#e8eeff;}
+    .user-role{font-size:11px;color:#4a6a99;margin-top:1px;}
+
+    .sidebar-nav{
+      flex:1;padding:16px 12px;overflow-y:auto;
+    }
+
+    .nav-section-label{
+      font-size:10px;font-weight:600;letter-spacing:.1em;
+      text-transform:uppercase;color:#2e4a6e;
+      padding:10px 12px 6px;
+    }
+
+    .nav-item{
+      display:flex;align-items:center;gap:11px;
+      padding:10px 13px;border-radius:10px;
+      cursor:pointer;
+      color:#6a87b8;font-size:13.5px;font-weight:400;
+      transition:background .15s,color .15s;
+      margin-bottom:2px;
+      text-decoration:none;
+    }
+
+    .nav-item .ti{font-size:17px;}
+
+    .nav-item:hover{background:rgba(255,255,255,.06);color:#b8ccf0;}
+
+    .nav-item.active{
+      background:rgba(59,98,212,.22);
+      color:#7badff;font-weight:500;
+    }
+
+    .nav-badge{
+      margin-left:auto;
+      background:#dc2626;color:#fff;
+      font-size:10px;font-weight:600;
+      border-radius:10px;padding:1px 7px;
+    }
+
+    .sidebar-bottom{
+      padding:16px 12px;
+      border-top:1px solid rgba(255,255,255,.07);
+    }
+
+    .btn-logout{
+      width:100%;display:flex;align-items:center;gap:10px;
+      padding:10px 13px;border-radius:10px;border:none;
+      background:rgba(220,38,38,.12);
+      color:#f87171;font-size:13.5px;font-weight:500;
+      cursor:pointer;transition:background .15s;
+    }
+    .btn-logout:hover{background:rgba(220,38,38,.22);}
+    .btn-logout .ti{font-size:17px;}
+
+    /* ── TOPBAR ── */
+    .topbar{
+      position:fixed;top:0;
+      left:var(--sidebar-w);
+      right:0;height:var(--topbar-h);
+      background:#fff;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;
+      padding:0 28px;gap:16px;
+      z-index:99;
+    }
+
+    .topbar-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.2rem;font-weight:600;
+      color:var(--text);flex:1;
+    }
+
+    .topbar-search{
+      display:flex;align-items:center;gap:8px;
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:10px;padding:8px 14px;
+      width:260px;
+    }
+
+    .topbar-search input{
+      border:none;background:transparent;
+      font-family:'Inter',sans-serif;font-size:13.5px;
+      color:var(--text);outline:none;width:100%;
+    }
+
+    .topbar-search input::placeholder{color:var(--muted);}
+    .topbar-search .ti{font-size:16px;color:var(--muted);}
+
+    .topbar-notif{
+      position:relative;width:38px;height:38px;
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:10px;display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:background .15s;
+    }
+    .topbar-notif:hover{background:var(--blue-light);}
+    .topbar-notif .ti{font-size:18px;color:var(--muted);}
+    .notif-dot{
+      position:absolute;top:6px;right:6px;
+      width:8px;height:8px;border-radius:50%;
+      background:#dc2626;border:2px solid #fff;
+    }
+
+    /* ── MAIN ── */
+    .main{
+      margin-left:var(--sidebar-w);
+      margin-top:var(--topbar-h);
+      flex:1;padding:28px;
+      min-height:calc(100vh - var(--topbar-h));
+    }
+
+    /* ── SECTIONS ── */
+    .section{display:none;}
+    .section.active{display:block;}
+
+    /* ── STAT CARDS ── */
+    .stat-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:16px;padding:20px 22px;
+      display:flex;align-items:flex-start;gap:14px;
+    }
+
+    .stat-icon{
+      width:44px;height:44px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;flex-shrink:0;
+    }
+
+    .stat-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:4px;}
+    .stat-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--text);}
+    .stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+    /* ── BOOK CARDS ── */
+    .book-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:14px;overflow:hidden;
+      transition:box-shadow .2s,transform .2s;
+    }
+    .book-card:hover{
+      box-shadow:0 8px 24px rgba(26,54,153,.12);
+      transform:translateY(-3px);
+    }
+
+    .book-cover{
+      height:160px;display:flex;align-items:center;justify-content:center;
+      font-size:48px;
+    }
+
+    .book-body{padding:14px 16px;}
+    .book-title{font-weight:600;font-size:14px;color:var(--text);margin-bottom:3px;line-height:1.3;}
+    .book-author{font-size:12px;color:var(--muted);margin-bottom:8px;}
+    .book-category{
+      display:inline-block;font-size:10.5px;font-weight:500;
+      padding:3px 10px;border-radius:20px;margin-bottom:10px;
+    }
+
+    .avail-yes{background:var(--green-bg);color:var(--green);}
+    .avail-no{background:var(--red-bg);color:var(--red);}
+    .cat-fiction{background:#ede9fe;color:#5b21b6;}
+    .cat-science{background:#e0f2fe;color:#0369a1;}
+    .cat-history{background:#fef3c7;color:#92400e;}
+    .cat-tech{background:#f0fdf4;color:#166534;}
+    .cat-arts{background:#fce7f3;color:#9d174d;}
+    .cat-biz{background:#fff7ed;color:#9a3412;}
+
+    .btn-borrow{
+      width:100%;height:36px;border:none;border-radius:9px;
+      background:var(--blue);color:#dce7ff;
+      font-size:12.5px;font-weight:500;cursor:pointer;
+      transition:background .15s;
+    }
+    .btn-borrow:hover{background:#1e42b8;}
+    .btn-borrow:disabled{background:#dde3f0;color:var(--muted);cursor:not-allowed;}
+
+    .btn-fav{
+      width:36px;height:36px;border:1px solid var(--border);
+      border-radius:9px;background:transparent;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:background .15s,border-color .15s;
+      font-size:16px;color:var(--muted);
+    }
+    .btn-fav.active,.btn-fav:hover{background:#fce7f3;border-color:#f9a8d4;color:#be185d;}
+
+    /* ── GENERIC CARD ── */
+    .g-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:14px;padding:20px 22px;
+    }
+
+    .g-card-title{
+      font-family:'Playfair Display',serif;
+      font-size:1rem;font-weight:600;color:var(--text);
+      margin-bottom:16px;
+      padding-bottom:12px;border-bottom:1px solid var(--border);
+    }
+
+    /* ── TABLE ── */
+    .lib-table{width:100%;border-collapse:collapse;}
+    .lib-table th{
+      font-size:11px;font-weight:600;letter-spacing:.06em;
+      text-transform:uppercase;color:var(--muted);
+      padding:10px 14px;text-align:left;
+      border-bottom:1px solid var(--border);
+      background:var(--bg);
+    }
+    .lib-table td{
+      padding:13px 14px;font-size:13.5px;
+      border-bottom:1px solid var(--border);
+      vertical-align:middle;
+    }
+    .lib-table tr:last-child td{border-bottom:none;}
+    .lib-table tr:hover td{background:#f8faff;}
+
+    /* ── STATUS BADGES ── */
+    .badge-ok{background:var(--green-bg);color:var(--green);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
+    .badge-warn{background:var(--amber-bg);color:var(--amber);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
+    .badge-due{background:var(--red-bg);color:var(--red);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
+    .badge-ret{background:#f1f5f9;color:#475569;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
+
+    /* ── NOTIF ITEMS ── */
+    .notif-item{
+      display:flex;align-items:flex-start;gap:14px;
+      padding:14px 0;border-bottom:1px solid var(--border);
+    }
+    .notif-item:last-child{border-bottom:none;}
+    .notif-icon{
+      width:38px;height:38px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:17px;flex-shrink:0;
+    }
+    .notif-title{font-size:13.5px;font-weight:500;color:var(--text);}
+    .notif-body{font-size:12px;color:var(--muted);margin-top:2px;}
+    .notif-time{font-size:11px;color:var(--muted);margin-top:4px;}
+    .notif-unread .notif-title{color:var(--blue-mid);}
+
+    /* ── PROFILE ── */
+    .profile-avatar{
+      width:80px;height:80px;border-radius:50%;
+      background:linear-gradient(135deg,#3b62d4,#7badff);
+      display:flex;align-items:center;justify-content:center;
+      font-size:2rem;font-weight:700;color:#fff;
+      margin-bottom:12px;
+    }
+
+    .form-field-label{
+      font-size:11.5px;font-weight:600;letter-spacing:.06em;
+      text-transform:uppercase;color:#4a5568;
+      margin-bottom:6px;display:block;
+    }
+
+    .lib-input{
+      width:100%;height:44px;
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:10px;padding:0 14px;
+      font-family:'Inter',sans-serif;font-size:14px;color:var(--text);
+      outline:none;transition:border-color .15s;
+    }
+    .lib-input:focus{border-color:var(--blue-mid);background:#fff;}
+
+    .btn-save{
+      height:44px;padding:0 28px;
+      background:var(--blue);border:none;border-radius:10px;
+      color:#dce7ff;font-size:14px;font-weight:500;
+      cursor:pointer;transition:background .15s;
+    }
+    .btn-save:hover{background:#1e42b8;}
+
+    /* ── SEARCH FILTER ── */
+    .filter-pill{
+      display:inline-flex;align-items:center;
+      padding:6px 16px;border-radius:20px;
+      border:1px solid var(--border);background:#fff;
+      font-size:12.5px;color:var(--muted);cursor:pointer;
+      transition:all .15s;margin-right:6px;margin-bottom:6px;
+    }
+    .filter-pill.active,.filter-pill:hover{
+      background:var(--blue);border-color:var(--blue);color:#fff;
+    }
+
+    /* ── TOAST ── */
+    .toast-wrap{
+      position:fixed;bottom:28px;right:28px;z-index:9999;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .toast-msg{
+      background:#0d1f44;color:#e8eeff;
+      padding:12px 18px;border-radius:12px;
+      font-size:13px;font-weight:500;
+      box-shadow:0 4px 20px rgba(0,0,0,.2);
+      animation:toastIn .3s ease;
+      display:flex;align-items:center;gap:10px;
+    }
+    @keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── MODAL ── */
+    .modal-backdrop-custom{
+      position:fixed;inset:0;background:rgba(7,18,41,.55);
+      z-index:200;display:flex;align-items:center;justify-content:center;
+      padding:20px;
+    }
+    .modal-box{
+      background:#fff;border-radius:20px;
+      width:100%;max-width:480px;
+      padding:32px;animation:rise .3s ease;
+    }
+    @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .modal-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.3rem;font-weight:600;color:var(--text);
+      margin-bottom:6px;
+    }
+    .modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+
+    .btn-primary-modal{
+      height:44px;padding:0 24px;
+      background:var(--blue);border:none;border-radius:10px;
+      color:#dce7ff;font-size:14px;font-weight:500;cursor:pointer;
+    }
+    .btn-secondary-modal{
+      height:44px;padding:0 24px;
+      background:#fff;border:1px solid var(--border);border-radius:10px;
+      color:var(--text);font-size:14px;cursor:pointer;
+    }
+
+    /* ── READING LIST ── */
+    .reading-list-item{
+      display:flex;align-items:center;gap:14px;
+      padding:12px 0;border-bottom:1px solid var(--border);
+    }
+    .reading-list-item:last-child{border-bottom:none;}
+    .rl-cover{
+      width:42px;height:56px;border-radius:6px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:22px;flex-shrink:0;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+    .prog-fill{height:100%;border-radius:3px;background:var(--blue-mid);}
+
+    /* ── RESPONSIVE ── */
+    .sidebar-toggle{
+      display:none;width:38px;height:38px;
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:10px;align-items:center;justify-content:center;
+      cursor:pointer;font-size:20px;color:var(--muted);
+    }
+
+    @media(max-width:900px){
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:translateX(0);}
+      .main,.topbar{margin-left:0;left:0;}
+      .sidebar-toggle{display:flex;}
+      .topbar-search{width:180px;}
+    }
+
+    @media(max-width:576px){
+      .main{padding:16px;}
+      .topbar{padding:0 16px;}
+      .topbar-search{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-badge"><i class="ti ti-books"></i> Digital Library</div>
+    <h2>Smart Library</h2>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">SR</div>
+    <div>
+      <div class="user-name">Sophea Reaksmey</div>
+      <div class="user-role">Reader Account</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a class="nav-item active" onclick="showSection('dashboard',this)">
+      <i class="ti ti-layout-dashboard"></i> Dashboard
+    </a>
+    <a class="nav-item" onclick="showSection('catalog',this)">
+      <i class="ti ti-books"></i> Book Catalog
+    </a>
+
+    <div class="nav-section-label">My Library</div>
+    <a class="nav-item" onclick="showSection('borrowing',this)">
+      <i class="ti ti-book-upload"></i> Borrowing
+    </a>
+    <a class="nav-item" onclick="showSection('favorites',this)">
+      <i class="ti ti-heart"></i> Favorites
+    </a>
+
+    <div class="nav-section-label">Account</div>
+    <a class="nav-item" onclick="showSection('notifications',this)">
+      <i class="ti ti-bell"></i> Notifications
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" onclick="showSection('profile',this)">
+      <i class="ti ti-user-circle"></i> Profile
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="confirmLogout()">
+      <i class="ti ti-logout"></i> Sign out
+    </button>
+  </div>
+</aside>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+  <div class="topbar-title" id="topbar-title">Dashboard</div>
+  <div class="topbar-search">
+    <i class="ti ti-search"></i>
+    <input type="text" placeholder="Search books…" oninput="liveSearch(this.value)" onfocus="showSection('catalog',document.querySelector('[onclick*=catalog]'))">
+  </div>
+  <div class="topbar-notif" onclick="showSection('notifications',document.querySelector('[onclick*=notifications]'))">
+    <i class="ti ti-bell"></i>
+    <div class="notif-dot"></div>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- ─── DASHBOARD ─── -->
+  <section class="section active" id="sec-dashboard">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:2px;">Wednesday, June 17, 2026</p>
+        <h1 style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--text);">Good morning, Sophea 👋</h1>
+      </div>
+    </div>
+
+    <!-- stat cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#eef2ff;color:var(--blue-mid);"><i class="ti ti-book-2"></i></div>
+          <div>
+            <div class="stat-label">Currently Borrowing</div>
+            <div class="stat-val">3</div>
+            <div class="stat-sub">of 5 allowed</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-clock"></i></div>
+          <div>
+            <div class="stat-label">Due Soon</div>
+            <div class="stat-val">1</div>
+            <div class="stat-sub">in 3 days</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-history"></i></div>
+          <div>
+            <div class="stat-label">Total Borrowed</div>
+            <div class="stat-val">24</div>
+            <div class="stat-sub">all time</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fce7f3;color:#be185d;"><i class="ti ti-heart"></i></div>
+          <div>
+            <div class="stat-label">Favorites</div>
+            <div class="stat-val">8</div>
+            <div class="stat-sub">saved books</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- current borrows -->
+      <div class="col-lg-7">
+        <div class="g-card">
+          <div class="g-card-title">Currently Borrowed</div>
+          <table class="lib-table">
+            <thead>
+              <tr>
+                <th>Book</th><th>Due Date</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="font-weight:500;font-size:13.5px;">The Lean Startup</div>
+                  <div style="font-size:11.5px;color:var(--muted);">Eric Ries</div>
+                </td>
+                <td><span style="font-size:13px;">Jun 20, 2026</span></td>
+                <td><span class="badge-warn">Due soon</span></td>
+                <td><button class="btn-borrow" style="width:auto;padding:0 14px;font-size:12px;" onclick="showToast('📚 Renewal requested for The Lean Startup')">Renew</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:500;font-size:13.5px;">Atomic Habits</div>
+                  <div style="font-size:11.5px;color:var(--muted);">James Clear</div>
+                </td>
+                <td><span style="font-size:13px;">Jul 1, 2026</span></td>
+                <td><span class="badge-ok">On time</span></td>
+                <td><button class="btn-borrow" style="width:auto;padding:0 14px;font-size:12px;" onclick="showToast('📚 Renewal requested for Atomic Habits')">Renew</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:500;font-size:13.5px;">Sapiens</div>
+                  <div style="font-size:11.5px;color:var(--muted);">Yuval Noah Harari</div>
+                </td>
+                <td><span style="font-size:13px;">Jul 8, 2026</span></td>
+                <td><span class="badge-ok">On time</span></td>
+                <td><button class="btn-borrow" style="width:auto;padding:0 14px;font-size:12px;" onclick="showToast('📚 Renewal requested for Sapiens')">Renew</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- recent notifications -->
+      <div class="col-lg-5">
+        <div class="g-card">
+          <div class="g-card-title">Recent Notifications</div>
+          <div class="notif-item notif-unread">
+            <div class="notif-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-clock-exclamation"></i></div>
+            <div>
+              <div class="notif-title">Due date reminder</div>
+              <div class="notif-body">The Lean Startup is due in 3 days</div>
+              <div class="notif-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="notif-item notif-unread">
+            <div class="notif-icon" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-sparkles"></i></div>
+            <div>
+              <div class="notif-title">New arrival</div>
+              <div class="notif-body">Deep Work by Cal Newport is now available</div>
+              <div class="notif-time">Yesterday</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-icon" style="background:var(--blue-light);color:var(--blue-mid);"><i class="ti ti-check"></i></div>
+            <div>
+              <div class="notif-title">Return confirmed</div>
+              <div class="notif-body">Zero to One returned successfully</div>
+              <div class="notif-time">Jun 10, 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- new books -->
+      <div class="col-12">
+        <div class="g-card">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="g-card-title mb-0" style="border:none;padding:0;">New Arrivals</div>
+            <a style="font-size:13px;color:var(--blue-mid);cursor:pointer;text-decoration:none;" onclick="showSection('catalog',document.querySelector('[onclick*=catalog]'))">View all →</a>
+          </div>
+          <div class="row g-3">
+            <div class="col-sm-6 col-md-3">
+              <div class="book-card">
+                <div class="book-cover" style="background:#ede9fe;">📘</div>
+                <div class="book-body">
+                  <div class="book-title">Deep Work</div>
+                  <div class="book-author">Cal Newport</div>
+                  <div><span class="book-category cat-biz">Business</span></div>
+                  <div class="d-flex gap-2">
+                    <button class="btn-borrow" onclick="borrowBook('Deep Work')">Borrow</button>
+                    <button class="btn-fav" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="book-card">
+                <div class="book-cover" style="background:#e0f2fe;">🔬</div>
+                <div class="book-body">
+                  <div class="book-title">A Brief History of Time</div>
+                  <div class="book-author">Stephen Hawking</div>
+                  <div><span class="book-category cat-science">Science</span></div>
+                  <div class="d-flex gap-2">
+                    <button class="btn-borrow" onclick="borrowBook('A Brief History of Time')">Borrow</button>
+                    <button class="btn-fav" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="book-card">
+                <div class="book-cover" style="background:#fef3c7;">📖</div>
+                <div class="book-body">
+                  <div class="book-title">The Midnight Library</div>
+                  <div class="book-author">Matt Haig</div>
+                  <div><span class="book-category cat-fiction">Fiction</span></div>
+                  <div class="d-flex gap-2">
+                    <button class="btn-borrow" onclick="borrowBook('The Midnight Library')">Borrow</button>
+                    <button class="btn-fav" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="book-card">
+                <div class="book-cover" style="background:#f0fdf4;">💻</div>
+                <div class="book-body">
+                  <div class="book-title">Clean Code</div>
+                  <div class="book-author">Robert C. Martin</div>
+                  <div><span class="book-category cat-tech">Technology</span></div>
+                  <div class="d-flex gap-2">
+                    <button class="btn-borrow" onclick="borrowBook('Clean Code')">Borrow</button>
+                    <button class="btn-fav" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BOOK CATALOG ─── -->
+  <section class="section" id="sec-catalog">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:20px;">Book Catalog</h1>
+
+    <div class="g-card mb-4">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
+            <i class="ti ti-search" style="font-size:17px;color:var(--muted);"></i>
+            <input type="text" id="catalog-search" placeholder="Search by title, author, or keyword…" style="border:none;background:transparent;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;" oninput="filterBooks()">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <button class="filter-pill active" onclick="setCat('All',this)">All</button>
+            <button class="filter-pill" onclick="setCat('Fiction',this)">Fiction</button>
+            <button class="filter-pill" onclick="setCat('Science',this)">Science</button>
+            <button class="filter-pill" onclick="setCat('History',this)">History</button>
+            <button class="filter-pill" onclick="setCat('Technology',this)">Technology</button>
+            <button class="filter-pill" onclick="setCat('Business',this)">Business</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3" id="book-grid">
+      <!-- books rendered by JS -->
+    </div>
+  </section>
+
+  <!-- ─── BORROWING ─── -->
+  <section class="section" id="sec-borrowing">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:20px;">Borrowing</h1>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#eef2ff;color:var(--blue-mid);"><i class="ti ti-book-2"></i></div>
+          <div><div class="stat-label">Active Borrows</div><div class="stat-val">3</div></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-clock"></i></div>
+          <div><div class="stat-label">Due This Week</div><div class="stat-val">1</div></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-check"></i></div>
+          <div><div class="stat-label">Returned</div><div class="stat-val">21</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- active borrows -->
+    <div class="g-card mb-3">
+      <div class="g-card-title">Active Borrows</div>
+      <table class="lib-table">
+        <thead><tr><th>Book</th><th>Borrowed</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><div style="font-weight:500;">The Lean Startup</div><div style="font-size:11.5px;color:var(--muted);">Eric Ries</div></td>
+            <td style="font-size:13px;">Jun 3, 2026</td>
+            <td style="font-size:13px;">Jun 20, 2026</td>
+            <td><span class="badge-warn">Due soon</span></td>
+            <td><button class="btn-borrow" style="width:auto;padding:0 16px;" onclick="showToast('✅ Renewal confirmed — new due: Jul 4, 2026')">Renew</button></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;">Atomic Habits</div><div style="font-size:11.5px;color:var(--muted);">James Clear</div></td>
+            <td style="font-size:13px;">Jun 10, 2026</td>
+            <td style="font-size:13px;">Jul 1, 2026</td>
+            <td><span class="badge-ok">On time</span></td>
+            <td><button class="btn-borrow" style="width:auto;padding:0 16px;" onclick="showToast('✅ Renewal confirmed — new due: Jul 15, 2026')">Renew</button></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;">Sapiens</div><div style="font-size:11.5px;color:var(--muted);">Yuval Noah Harari</div></td>
+            <td style="font-size:13px;">Jun 17, 2026</td>
+            <td style="font-size:13px;">Jul 8, 2026</td>
+            <td><span class="badge-ok">On time</span></td>
+            <td><button class="btn-borrow" style="width:auto;padding:0 16px;" onclick="showToast('✅ Renewal confirmed — new due: Jul 22, 2026')">Renew</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- borrowing history -->
+    <div class="g-card">
+      <div class="g-card-title">Borrowing History</div>
+      <table class="lib-table">
+        <thead><tr><th>Book</th><th>Borrowed</th><th>Returned</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><div style="font-weight:500;">Zero to One</div><div style="font-size:11.5px;color:var(--muted);">Peter Thiel</div></td>
+            <td style="font-size:13px;">May 10, 2026</td>
+            <td style="font-size:13px;">Jun 10, 2026</td>
+            <td><span class="badge-ret">Returned</span></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;">The Psychology of Money</div><div style="font-size:11.5px;color:var(--muted);">Morgan Housel</div></td>
+            <td style="font-size:13px;">Apr 5, 2026</td>
+            <td style="font-size:13px;">May 5, 2026</td>
+            <td><span class="badge-ret">Returned</span></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;">1984</div><div style="font-size:11.5px;color:var(--muted);">George Orwell</div></td>
+            <td style="font-size:13px;">Mar 1, 2026</td>
+            <td style="font-size:13px;">Mar 28, 2026</td>
+            <td><span class="badge-ret">Returned</span></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;">Thinking, Fast and Slow</div><div style="font-size:11.5px;color:var(--muted);">Daniel Kahneman</div></td>
+            <td style="font-size:13px;">Feb 2, 2026</td>
+            <td style="font-size:13px;">Mar 2, 2026</td>
+            <td><span class="badge-ret">Returned</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── FAVORITES ─── -->
+  <section class="section" id="sec-favorites">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:20px;">Favorites & Reading Lists</h1>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="g-card">
+          <div class="g-card-title">Saved Books</div>
+          <div class="reading-list-item">
+            <div class="rl-cover" style="background:#ede9fe;">📘</div>
+            <div style="flex:1;">
+              <div style="font-weight:500;font-size:13.5px;">Deep Work</div>
+              <div style="font-size:12px;color:var(--muted);">Cal Newport</div>
+            </div>
+            <span class="book-category cat-biz" style="font-size:10.5px;">Business</span>
+            <button class="btn-fav active" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+          </div>
+          <div class="reading-list-item">
+            <div class="rl-cover" style="background:#fce7f3;">🌸</div>
+            <div style="flex:1;">
+              <div style="font-weight:500;font-size:13.5px;">The Alchemist</div>
+              <div style="font-size:12px;color:var(--muted);">Paulo Coelho</div>
+            </div>
+            <span class="book-category cat-fiction" style="font-size:10.5px;">Fiction</span>
+            <button class="btn-fav active" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+          </div>
+          <div class="reading-list-item">
+            <div class="rl-cover" style="background:#e0f2fe;">🔬</div>
+            <div style="flex:1;">
+              <div style="font-weight:500;font-size:13.5px;">A Brief History of Time</div>
+              <div style="font-size:12px;color:var(--muted);">Stephen Hawking</div>
+            </div>
+            <span class="book-category cat-science" style="font-size:10.5px;">Science</span>
+            <button class="btn-fav active" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+          </div>
+          <div class="reading-list-item">
+            <div class="rl-cover" style="background:#fef3c7;">🏛️</div>
+            <div style="flex:1;">
+              <div style="font-weight:500;font-size:13.5px;">Guns, Germs and Steel</div>
+              <div style="font-size:12px;color:var(--muted);">Jared Diamond</div>
+            </div>
+            <span class="book-category cat-history" style="font-size:10.5px;">History</span>
+            <button class="btn-fav active" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="g-card mb-3">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="g-card-title mb-0" style="border:none;padding:0;">Reading Lists</div>
+            <button class="btn-save" style="height:34px;padding:0 16px;font-size:12.5px;" onclick="showToast('📋 New reading list created!')">+ New List</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div style="font-weight:500;font-size:13.5px;">Must-Read Business</div>
+                <span style="font-size:11px;color:var(--muted);">4 books</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" style="width:75%;"></div></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:5px;">3 of 4 read</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div style="font-weight:500;font-size:13.5px;">Science Classics</div>
+                <span style="font-size:11px;color:var(--muted);">6 books</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" style="width:33%;"></div></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:5px;">2 of 6 read</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div style="font-weight:500;font-size:13.5px;">Cambodian History</div>
+                <span style="font-size:11px;color:var(--muted);">3 books</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--muted);"></div></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:5px;">Not started</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── NOTIFICATIONS ─── -->
+  <section class="section" id="sec-notifications">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:20px;">Notifications</h1>
+    <div class="g-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="g-card-title mb-0" style="border:none;padding:0;">All Notifications</div>
+        <button style="background:none;border:none;font-size:12.5px;color:var(--blue-mid);cursor:pointer;" onclick="showToast('✓ All notifications marked as read')">Mark all read</button>
+      </div>
+      <div class="notif-item notif-unread">
+        <div class="notif-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-clock-exclamation"></i></div>
+        <div>
+          <div class="notif-title">Due date reminder</div>
+          <div class="notif-body">The Lean Startup is due on June 20, 2026 — only 3 days left. Renew now to avoid a late fee.</div>
+          <div class="notif-time">2 hours ago · Unread</div>
+        </div>
+      </div>
+      <div class="notif-item notif-unread">
+        <div class="notif-icon" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-sparkles"></i></div>
+        <div>
+          <div class="notif-title">New book available</div>
+          <div class="notif-body">Deep Work by Cal Newport has just been added to the catalog and is available to borrow.</div>
+          <div class="notif-time">Yesterday · Unread</div>
+        </div>
+      </div>
+      <div class="notif-item notif-unread">
+        <div class="notif-icon" style="background:#fce7f3;color:#be185d;"><i class="ti ti-heart"></i></div>
+        <div>
+          <div class="notif-title">Wishlist available</div>
+          <div class="notif-body">The Alchemist, which you saved to favorites, is now available for borrowing.</div>
+          <div class="notif-time">Jun 15, 2026 · Unread</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:var(--blue-light);color:var(--blue-mid);"><i class="ti ti-check"></i></div>
+        <div>
+          <div class="notif-title">Return confirmed</div>
+          <div class="notif-body">Zero to One has been successfully returned. Thank you!</div>
+          <div class="notif-time">Jun 10, 2026</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:var(--blue-light);color:var(--blue-mid);"><i class="ti ti-refresh"></i></div>
+        <div>
+          <div class="notif-title">Renewal approved</div>
+          <div class="notif-body">Your renewal request for Sapiens was approved. New due date: July 8, 2026.</div>
+          <div class="notif-time">Jun 8, 2026</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-clock-exclamation"></i></div>
+        <div>
+          <div class="notif-title">Overdue reminder</div>
+          <div class="notif-body">Reminder: please return 1984 by George Orwell — it was due on March 28.</div>
+          <div class="notif-time">Mar 29, 2026</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PROFILE ─── -->
+  <section class="section" id="sec-profile">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:20px;">My Profile</h1>
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="g-card text-center">
+          <div class="d-flex justify-content-center">
+            <div class="profile-avatar">SR</div>
+          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;margin-bottom:4px;">Sophea Reaksmey</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Reader · Member since Jan 2025</div>
+          <div style="background:var(--bg);border-radius:10px;padding:14px;text-align:left;">
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
+              <span style="color:var(--muted);">Member ID</span><span style="font-weight:500;">LIB-2025-0042</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
+              <span style="color:var(--muted);">Books borrowed</span><span style="font-weight:500;">24</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
+              <span style="color:var(--muted);">Account status</span><span class="badge-ok">Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="g-card mb-3">
+          <div class="g-card-title">Edit Profile</div>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-field-label">First Name</label>
+              <input class="lib-input" type="text" value="Sophea">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-field-label">Last Name</label>
+              <input class="lib-input" type="text" value="Reaksmey">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-field-label">Email</label>
+              <input class="lib-input" type="email" value="sophea.r@gmail.com">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-field-label">Phone</label>
+              <input class="lib-input" type="tel" value="+855 12 345 678">
+            </div>
+            <div class="col-12">
+              <button class="btn-save" onclick="showToast('✅ Profile updated successfully')">Save changes</button>
+            </div>
+          </div>
+        </div>
+        <div class="g-card">
+          <div class="g-card-title">Change Password</div>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-field-label">Current Password</label>
+              <input class="lib-input" type="password" placeholder="Enter current password">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-field-label">New Password</label>
+              <input class="lib-input" type="password" placeholder="New password">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-field-label">Confirm Password</label>
+              <input class="lib-input" type="password" placeholder="Confirm new password">
+            </div>
+            <div class="col-12">
+              <button class="btn-save" onclick="showToast('🔒 Password changed successfully')">Update password</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main><!-- /main -->
+
+<!-- ══ TOAST CONTAINER ══ -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ══ BOOK DETAIL MODAL ══ -->
+<div class="modal-backdrop-custom" id="book-modal" style="display:none;" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="font-size:48px;text-align:center;margin-bottom:16px;" id="modal-emoji">📘</div>
+    <div class="modal-title" id="modal-title">Book Title</div>
+    <div class="modal-sub" id="modal-author">Author · Category</div>
+    <div style="font-size:13.5px;line-height:1.7;color:var(--muted);margin-bottom:20px;" id="modal-desc">Description goes here.</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;">
+      <span id="modal-avail" class="badge-ok">Available</span>
+      <span style="font-size:12px;color:var(--muted);">ISBN: 978-3-16-148410-0</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-primary-modal" id="modal-borrow-btn" onclick="borrowFromModal()">Borrow this book</button>
+      <button class="btn-secondary-modal" onclick="document.getElementById('book-modal').style.display='none'">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LOGOUT MODAL ══ -->
+<div class="modal-backdrop-custom" id="logout-modal" style="display:none;" onclick="closeLogoutModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="font-size:40px;text-align:center;margin-bottom:16px;">👋</div>
+    <div class="modal-title">Sign out?</div>
+    <div class="modal-sub">You'll need to sign back in to access your library account.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-primary-modal" style="background:#dc2626;" onclick="doLogout()">Yes, sign out</button>
+      <button class="btn-secondary-modal" onclick="document.getElementById('logout-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+/* ── BOOK DATA ── */
+const books = [
+  {title:'The Lean Startup',author:'Eric Ries',cat:'Business',emoji:'📊',bg:'#fff7ed',available:false,desc:'A methodology for developing businesses and products using lean manufacturing principles.'},
+  {title:'Atomic Habits',author:'James Clear',cat:'Business',emoji:'⚡',bg:'#fef3c7',available:true,desc:'Practical strategies for forming good habits, breaking bad ones, and mastering tiny behaviours.'},
+  {title:'Sapiens',author:'Yuval Noah Harari',cat:'History',emoji:'🏛️',bg:'#fef3c7',available:false,desc:'A narrative history of humankind from the Stone Age to the modern era.'},
+  {title:'Deep Work',author:'Cal Newport',cat:'Business',emoji:'📘',bg:'#ede9fe',available:true,desc:'Rules for focused success in a distracted world — how to produce your best work.'},
+  {title:'A Brief History of Time',author:'Stephen Hawking',cat:'Science',emoji:'🔬',bg:'#e0f2fe',available:true,desc:'An exploration of cosmology, from the Big Bang to black holes, written for a general audience.'},
+  {title:'The Midnight Library',author:'Matt Haig',cat:'Fiction',emoji:'📖',bg:'#fef3c7',available:true,desc:'Between life and death there is a library — a story about regret, hope, and second chances.'},
+  {title:'Clean Code',author:'Robert C. Martin',cat:'Technology',emoji:'💻',bg:'#f0fdf4',available:true,desc:'A handbook of agile software craftsmanship that will help you write better, cleaner code.'},
+  {title:'1984',author:'George Orwell',cat:'Fiction',emoji:'👁️',bg:'#fce7f3',available:true,desc:'A dystopian novel set in a totalitarian society ruled by Big Brother.'},
+  {title:'Guns, Germs and Steel',author:'Jared Diamond',cat:'History',emoji:'🗺️',bg:'#fef9c3',available:false,desc:'An investigation into why some civilisations came to dominate others.'},
+  {title:'The Alchemist',author:'Paulo Coelho',cat:'Fiction',emoji:'🌸',bg:'#fce7f3',available:true,desc:'A philosophical novel about a young shepherd\'s journey to find treasure and purpose.'},
+  {title:'Zero to One',author:'Peter Thiel',cat:'Business',emoji:'🚀',bg:'#ede9fe',available:true,desc:'Notes on startups, or how to build the future by creating truly unique companies.'},
+  {title:'Python Crash Course',author:'Eric Matthes',cat:'Technology',emoji:'🐍',bg:'#f0fdf4',available:true,desc:'A hands-on, project-based introduction to programming with Python.'},
+];
+
+let currentCat = 'All';
+let currentSearch = '';
+let currentModalBook = null;
+
+function renderBooks(list){
+  const grid = document.getElementById('book-grid');
+  if(!list.length){
+    grid.innerHTML='<div class="col-12"><div class="g-card text-center" style="padding:40px;color:var(--muted);">No books found. Try a different search or filter.</div></div>';
+    return;
+  }
+  grid.innerHTML = list.map(b=>`
+    <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="book-card">
+        <div class="book-cover" style="background:${b.bg};">${b.emoji}</div>
+        <div class="book-body">
+          <div class="book-title">${b.title}</div>
+          <div class="book-author">${b.author}</div>
+          <div><span class="book-category cat-${b.cat.toLowerCase().replace('technology','tech').replace('business','biz')}">${b.cat}</span></div>
+          <div style="font-size:11.5px;margin-bottom:10px;">
+            <span class="${b.available?'avail-yes':'avail-no'}" style="background:${b.available?'var(--green-bg)':'var(--red-bg)'};color:${b.available?'var(--green)':'var(--red)'};padding:2px 8px;border-radius:10px;">
+              ${b.available?'Available':'Borrowed'}
+            </span>
+          </div>
+          <div class="d-flex gap-2 mb-2">
+            <button class="btn-borrow" style="font-size:12px;" onclick="openModal('${b.title.replace(/'/g,"\\'")}')">Details</button>
+            <button class="btn-fav" onclick="toggleFav(this)"><i class="ti ti-heart"></i></button>
+          </div>
+          <button class="btn-borrow" ${b.available?'':'disabled'} onclick="borrowBook('${b.title.replace(/'/g,"\\'")}')">
+            ${b.available?'Borrow':'Unavailable'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterBooks(){
+  currentSearch = document.getElementById('catalog-search').value.toLowerCase();
+  const filtered = books.filter(b=>{
+    const matchCat = currentCat==='All' || b.cat===currentCat;
+    const matchSearch = b.title.toLowerCase().includes(currentSearch) || b.author.toLowerCase().includes(currentSearch);
+    return matchCat && matchSearch;
+  });
+  renderBooks(filtered);
+}
+
+function setCat(cat, btn){
+  currentCat = cat;
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  filterBooks();
+}
+
+function liveSearch(val){
+  currentSearch = val.toLowerCase();
+  filterBooks();
+}
+
+/* ── SECTION NAVIGATION ── */
+function showSection(id, el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles = {dashboard:'Dashboard',catalog:'Book Catalog',borrowing:'Borrowing',favorites:'Favorites',notifications:'Notifications',profile:'My Profile'};
+  document.getElementById('topbar-title').textContent = titles[id]||'';
+  if(id==='catalog') renderBooks(books);
+  if(window.innerWidth<=900) document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ── BORROW ── */
+function borrowBook(title){
+  showToast(`📚 Borrow request sent for "${title}"`);
+}
+
+/* ── FAVORITES ── */
+function toggleFav(btn){
+  btn.classList.toggle('active');
+  if(btn.classList.contains('active')){
+    showToast('❤️ Added to favorites');
+  } else {
+    showToast('🤍 Removed from favorites');
+  }
+}
+
+/* ── MODAL ── */
+function openModal(title){
+  const b = books.find(x=>x.title===title);
+  if(!b) return;
+  currentModalBook = b;
+  document.getElementById('modal-emoji').textContent = b.emoji;
+  document.getElementById('modal-title').textContent = b.title;
+  document.getElementById('modal-author').textContent = b.author+' · '+b.cat;
+  document.getElementById('modal-desc').textContent = b.desc;
+  const avail = document.getElementById('modal-avail');
+  avail.textContent = b.available?'Available':'Currently borrowed';
+  avail.className = b.available?'badge-ok':'badge-due';
+  document.getElementById('modal-borrow-btn').disabled = !b.available;
+  document.getElementById('book-modal').style.display='flex';
+}
+
+function borrowFromModal(){
+  if(currentModalBook){
+    showToast(`📚 Borrow request sent for "${currentModalBook.title}"`);
+    document.getElementById('book-modal').style.display='none';
+  }
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('book-modal'))
+    document.getElementById('book-modal').style.display='none';
+}
+
+/* ── LOGOUT ── */
+function confirmLogout(){
+  document.getElementById('logout-modal').style.display='flex';
+}
+function closeLogoutModal(e){
+  if(e.target===document.getElementById('logout-modal'))
+    document.getElementById('logout-modal').style.display='none';
+}
+function doLogout(){
+  document.getElementById('logout-modal').style.display='none';
+  showToast('👋 Signed out. Redirecting…');
+  setTimeout(()=>{ window.location.href='library-login.html'; },1500);
+}
+
+/* ── TOAST ── */
+function showToast(msg){
+  const wrap = document.getElementById('toast-wrap');
+  const div = document.createElement('div');
+  div.className='toast-msg';
+  div.textContent=msg;
+  wrap.appendChild(div);
+  setTimeout(()=>div.remove(),3000);
+}
+
+/* ── SIDEBAR TOGGLE ── */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ── INIT ── */
+renderBooks(books);
+
+</script>
+</body>
+</html>
